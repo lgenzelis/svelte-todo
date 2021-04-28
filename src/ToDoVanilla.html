@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>ToDo Vanilla</title>
+  <style>
+    li {
+      list-style-type: none;
+      font-weight: bold;
+    }
+
+    li::before {
+      content: '✅';
+      margin-right: 5px;
+    }
+
+    .crossed {
+      text-decoration: line-through;
+    }
+
+    li.crossed {
+      list-style-type: none;
+      font-weight: normal;
+      filter: grayscale(0.6);
+    }
+  </style>
+  <script>
+    let currentToDoText = 'say hello world';
+
+    function createTodoApp() {
+      const form = document.createElement('form');
+      const input = document.createElement('input');
+      const addTodo = document.createElement('button');
+      addTodo.textContent = 'Add ToDo';
+
+      form.appendChild(input);
+      form.appendChild(addTodo);
+      document.body.appendChild(form);
+
+      const todoList = document.createElement('ul');
+      document.body.appendChild(todoList);
+
+      const clearCompletedTasks = document.createElement('button');
+      clearCompletedTasks.textContent = 'Clear completed tasks';
+      clearCompletedTasks.disabled = true;
+      document.body.appendChild(clearCompletedTasks);
+
+      function syncFormState() {
+        input.value = currentToDoText;
+        addTodo.disabled = !currentToDoText.trim();
+      }
+
+      function inputOnChange(event) {
+        currentToDoText = event.target.value;
+        syncFormState();
+      }
+
+      function onItemClick(event) {
+        const item = event.target;
+        item.toDoApp__done = !item.toDoApp__done;
+        if (item.toDoApp__done) {
+          item.className = 'crossed';
+          clearCompletedTasks.disabled = false;
+        } else {
+          item.className = '';
+          clearCompletedTasks.disabled = ![...todoList.children].some(todo => todo.toDoApp__done);
+        }
+      }
+
+      function onSubmit(event) {
+        console.log('onsubmit')
+        event.preventDefault();
+        const newItem = document.createElement('li');
+        newItem.textContent = currentToDoText.trim();
+        newItem.toDoApp__done = false;
+        newItem.addEventListener('click', onItemClick);
+        todoList.appendChild(newItem);
+
+        currentToDoText = '';
+        syncFormState();
+      }
+
+      function clearCompletedTasksHandler() {
+        const children = [...todoList.children]; // todoList.children is not actually an array, that's why I do this
+        children.forEach(todo => {
+          if (todo.toDoApp__done) {
+            todo.remove();
+          }
+        });
+        clearCompletedTasks.disabled = true;
+      }
+
+      input.addEventListener('input', inputOnChange)
+      form.addEventListener('submit', onSubmit);
+      clearCompletedTasks.addEventListener('click', clearCompletedTasksHandler);
+
+      syncFormState();
+    }
+  </script>
+</head>
+
+<body>
+  <script>createTodoApp()</script>
+</body>
+
+</html>
